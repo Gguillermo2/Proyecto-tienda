@@ -410,10 +410,9 @@
                         console.log('Opción no válida'.bgRed);
                         break;
 
-                    case '0':
-                            salir = true; 
+                        case '0':
                             console.log('$$$ PROGRAMA FINALIZADO $$$ '.rainbow);
-                            break;
+                            return;
             }
         }
     
