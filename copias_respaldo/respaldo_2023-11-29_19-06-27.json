@@ -1,0 +1,74 @@
+[
+  {
+    "codigoproducto": "01",
+    "nombreproducto": "Cpu AMD Ryzen 7 5700",
+    "inventarioproducto": 8,
+    "precioproducto": 785000
+  },
+  {
+    "codigoproducto": "02",
+    "nombreproducto": "Boar Asus prime BM40",
+    "inventarioproducto": 10,
+    "precioproducto": 550000
+  },
+  {
+    "codigoproducto": "03",
+    "nombreproducto": "Memoria Ram 8Gb Ddr4",
+    "inventarioproducto": 12,
+    "precioproducto": 130000
+  },
+  {
+    "codigoproducto": "04",
+    "nombreproducto": " Ssd   M.2   500GB  ",
+    "inventarioproducto": 7,
+    "precioproducto": 389000
+  },
+  {
+    "codigoproducto": "05",
+    "nombreproducto": "Disco Mecanico 1tera",
+    "inventarioproducto": 6,
+    "precioproducto": 230000
+  },
+  {
+    "codigoproducto": "06",
+    "nombreproducto": "Gabinete thermaltake",
+    "inventarioproducto": 8,
+    "precioproducto": 340000
+  },
+  {
+    "codigoproducto": "07",
+    "nombreproducto": "Mouse logitech  g305",
+    "inventarioproducto": 13,
+    "precioproducto": 160000
+  },
+  {
+    "codigoproducto": "08",
+    "nombreproducto": " Tecaldo  HK   GK61 ",
+    "inventarioproducto": 10,
+    "precioproducto": 220000
+  },
+  {
+    "codigoproducto": "09",
+    "nombreproducto": " Mouse  Pad  RGB HK",
+    "inventarioproducto": 15,
+    "precioproducto": 65000
+  },
+  {
+    "codigoproducto": "10",
+    "nombreproducto": "Monitor Samsung 27Pul",
+    "inventarioproducto": 10,
+    "precioproducto": 675000
+  },
+  {
+    "codigoproducto": "11",
+    "nombreproducto": "Portatil Lenovo MagicPro",
+    "inventarioproducto": 9,
+    "precioproducto": 3200000
+  },
+  {
+    "codigoproducto": "12",
+    "nombreproducto": "Televisro Smsung 60pul",
+    "inventarioproducto": 17,
+    "precioproducto": 4800000
+  }
+]
