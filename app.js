@@ -1,4 +1,4 @@
-    //Esto importa el módulo colors de NPM para darle color al texto en la consola
+    //Esto importa el módulo colors  para darle color  y edicion  al texto en la consola
         const colors = require('colors');
     //Importa el módulo fs de Node.js y específicamente las promesas para hacer operaciones asíncronas más fáciles
         const fs = require('fs').promises;
@@ -7,7 +7,7 @@
         input: process.stdin,
         output: process.stdout, 
     });
-    //Importa el módulo cli-table para imprimir tablas bonitas en la consola
+    //Se Importa el módulo cli-table para imprimir tablas  en la consola
         const Table = require('cli-table');
     //Declara la clase Producto para representar productos en la tienda
     //Usa propiedades privadas con el # para encapsular los datos
@@ -55,16 +55,16 @@
         set precioproducto(precio) {
             this.#precioproducto = precio;
         }
-        //es una función asincrónica que muestra los detalles de un producto en una tabla. 
+        //Se inicializa una función asincrónica (mostrarEn) con el fin que muestra los detalles de un producto en una tabla. 
         async mostrarEnTabla() {
-                // Utiliza la librería Table para crear una tabla con encabezados (código, nombre, inventario y precio) y una fila de datos 
+                // Utilizando la librería Table para crear una tabla con encabezados (código, nombre, inventario y precio) y una fila de datos 
                 const table = new Table({
                     head: ['Código', 'Nombre', 'Inventario', 'Precio'],
                     colWidths: [15, 25, 15, 15],
                 });
                 //Inserta una fila en la tabla con los datos del producto actual, que se acceden a través de las propiedades codigoproducto, nombreproducto, inventarioproducto y precioproducto del objeto en el que se encuentra esta función.
                 table.push([this.codigoproducto, this.nombreproducto, this.inventarioproducto, this.precioproducto]);
-                //: Muestra la representación en forma de cadena de la tabla en la consola.
+                //Muestra la representación en forma de cadena de la tabla en la consola.
                 console.log(table.toString());
             }
         }
@@ -103,18 +103,6 @@
         set listaproductos(lista) {
             this.#listaproductos = lista; 
         }
-        //Esta es una función asincrónica que guarda los productos en un archivo.
-        async grabararchivoproductos() {
-        //Se utiliza un bloque try catch para manejar cualquier error que pueda ocurrir durante el proceso de escritura en el archivo.
-            try {
-            //Utiliza el módulo fs  que significa (File System) para escribir en el archivo datos.json.
-            //Se utiliza  el método stringify para convertir un objeto JavaScript (en este caso, this.#listaproductos) a una cadena de texto JSON. null y 2, controlan la forma en que se formatea la cadena JSON resultante.
-                await fs.writeFile('./datos.json', JSON.stringify(this.#listaproductos, null, 2));
-                console.log('Productos guardados en datos.json'.bgGreen);
-            } catch (error) {
-                console.error(`Error al guardar los productos: ${error.message}`.bgRed);
-            }
-        }
         //Este método se encarga de mostrar los productos almacenados en la lista.
         mostrarProductos() {
             //if:Comprueba si la lista de productos está vacía. Si no hay productos en la lista, muestra un mensaje en la consola 
@@ -140,6 +128,111 @@
             //Muestra la representación en forma de cadena de la tabla en la consola. table.toString() convierte la tabla en una cadena para mostrarla en la consola.
             console.log(table.toString());
         }
+        //método es asincrónico y se encarga de cargar los datos desde el archivo.
+        async cargarDatos() {
+            //Se utiliza un bloque try catch para manejar cualquier posible error que pueda ocurrir durante el proceso de lectura del archivo.
+            try {
+                //se utiliza readfile para leer el contenido del archivo datos.json y se espera la finalización para obtener los datos
+                const data = await fs.readFile('./datos.json', 'utf-8');
+                //Se utiliza jhon.parse función que convierte una cadena de texto JSON en un objeto JavaScrip con el fin de trabajar con esos datos de una manera más eficiente
+                this.listaproductos = JSON.parse(data);
+                console.log(`Productos cargados desde datos.json`.bgBlue);
+            } catch (error) {
+                console.error(`Error al cargar el archivo: ${error.message}`.bgRed);
+            }
+        }
+
+        //método que es asincrónico y se encarga de realizar copias de respaldo.
+        async copiaDeRespaldo() {
+            ////Se utiliza un bloque try catch para manejar cualquier posible error que pueda ocurrir durante el proceso deobtener la fecha 
+            try {
+                //Se utiliuza la funcion obtenerFechaActualFormateada para obtener la fecha actual . Esta fecha se utilizará para construir el nombre del archivo de respaldo
+                const fechaActual = obtenerFechaActualFormateada();
+                //Crea el nombre del archivo de respaldo utilizando la fecha actual formatead
+                const nombreCopiaRespaldo = `respaldo_${fechaActual}.json`;
+                //Se utiliza fs.readFile para leer el contenido del archivo datos.json de forma asíncrona y obtiene los datos en formato de cadena
+                const data = await fs.readFile('./datos.json', 'utf-8');
+                //Se Utiliza fs.copyFile para realizar una copia del archivo original (datos.json) a la carpeta de copias de respaldo, utilizando el nombre construido anteriormente
+                await fs.copyFile('./datos.json', `./copias_respaldo/${nombreCopiaRespaldo}`);
+                //mensaj qeu confirma el exito de la accion 
+                console.log(`Copia de respaldo creada: ${nombreCopiaRespaldo}`.bgGreen);
+            } catch (error) {
+                console.error(`Error al crear la copia de respaldo: ${error.message}`.bgRed);
+            }
+        }
+
+        //método que es asincrónico y se encarga de realizar una restauracion de copias por si se estropea el archivoprincipal
+        async restaurarDesdeCopia() {
+            // Función restaurarDesdeCopia
+            try {
+                //Se Utiliza fs.readdir para obtener la lista de archivos de la carpeta copias_respaldo de forma asíncrona que se almacena en listaCopias.
+                const listaCopias = await fs.readdir('./copias_respaldo');
+                //En este if Si no hay copias de respaldo disponibles, muestra un mensaje y sale de la función
+                if (listaCopias.length === 0) {
+                    console.log('No hay copias de respaldo disponibles'.bgYellow);
+                    return;
+            }
+            //Muestra las copias de respaldo disponibles enumeradas en la consola
+                console.log('Copias de respaldo disponibles:'.bgBlue);
+                //Se utiliza una función de flecha que toma dos parámetros. copia
+                listaCopias.forEach((copia, index) => {
+                // Dentro de la función de flecha, se utiliza console.log para imprimir en la consola una cadena que combina el índice más uno index+1 osea el nombre de la copia y suma de 1 al índice se realiza porque los índices de arrays comienzan desde 0, pero para presentar al usuario de manera más natural, se suma 1
+                console.log(`${index + 1}. ${copia}`);
+            });
+            //En esta parte donde se pausa se Pide al usuario que seleccione una copia de respaldo ingresando un número. Convierte la opción a un índice de array restando 1.
+                const opcion = await pausaYObtenerEntrada('Seleccione una copia de respaldo (1, 2, etc.): ');
+                const indiceCopia = parseInt(opcion) - 1;
+                //Se utiliza un if por Si la opción seleccionada es válida, utiliza fs.copyFile para restaurar el archivo original (datos.json) desde la copia seleccionada. 
+                if (!isNaN(indiceCopia) && indiceCopia >= 0 && indiceCopia < listaCopias.length) {
+                    const nombreCopiaSeleccionada = listaCopias[indiceCopia];
+                    await fs.copyFile(`./copias_respaldo/${nombreCopiaSeleccionada}`, './datos.json');
+                    //Muestra mensajes de éxito y cómo aplicar los cambios reiniciando la aplicación. 
+                    console.log(`Restauración exitosa desde la copia: ${nombreCopiaSeleccionada}`.green);
+                    console.log('Reinicie la aplicacion con controlc para aplicar correctamente los cambios'.bgGreen);
+                } else {//En caso contrario muestra un mensaje de opción no válida.
+                    console.log('Opción no válida'.bgRed);
+                }
+            } catch (error) {//Captura cualquier error que pueda ocurrir durante el proceso e imprime un mensaje de error en la consola
+                console.error(`Error al restaurar desde copia de respaldo: ${error.message}`.bgRed);
+            }
+        }
+
+        //método que es asincrónico y se encarga de realizar la agregacion de un nuevo produnfo 
+        async agregarNuevoProducto() {
+            //se crea un bloque try, donde se manejarán posibles errores Si ocurre algún error dentro de este bloque, el control se trasladará al bloque catch
+            try {
+                //Se Declara una constante nuevoProducto y espera a que la función obtenerDetallesProducto() se complete antes de asignar el resultado a esta constante
+                const nuevoProducto = await obtenerDetallesProducto();
+                //Agrega el nuevo producto a la lista de productos (this.listaproductos).
+                this.listaproductos.push(nuevoProducto);
+                //Llama a la función asincrónica grabararchivoproductos y espera a que se complete 
+                await grabararchivoproductos(this.listaproductos);
+                //imprime un mensaje de exito en la consola 
+                console.log('Producto agregado con éxito'.bgGreen);
+                } catch (error) {//Captura cualquier error que pueda ocurrir durante el proceso e imprime un mensaje de error en la consola
+                console.error(`Error al agregar el nuevo producto: ${error.message}`.bgRed);
+                }
+            }
+
+            //método que es asincrónico y se encarga de realizar la elminiacion de un producto en el archivo datos.Json
+        async eliminarProductoInteractivo() {
+            //Solicita al usuario ingresar el código del producto mediante la función pausaYObtenerEntrada y espera a que la entrada sea proporcionada antes de continuar
+            const codigo = await pausaYObtenerEntrada('Código del producto: ');
+            //Utiliza el método findIndex para buscar en la lista de productos el índice del producto que tiene el código proporcionado por el usuario
+            const index = this.listaproductos.findIndex(producto => producto.codigoproducto === codigo);
+            // El if  se Comienza como  estructura condicional que verifica si se encontró el producto en la lista
+            if (index !== -1) {
+                // Elimina el producto del array utilizando el método splice. El segundo argumento
+                this.listaproductos.splice(index, 1); // Elimina el producto del array
+                //Guarda la lista actualizada de productos en el archivo utilizando la función asincrónica grabararchivoproductos
+                await grabararchivoproductos(this.listaproductos);
+                //imprime en la consola un mensaje 
+                console.log(`Producto con código ${codigo} eliminado con éxito`.bgGreen);
+            } else {//Inicia el bloque que se ejecutará si el producto no se encuentra en la lista.
+                console.log(`Producto con código ${codigo} no encontrado`.bgRed);
+            }
+        }
+        
         // Este es un método asincrónico que administra el proceso de compra de productos.
         async comprarProducto() {
             //Comprueba si el carrito de compras (#carritoCompras) está vacío o no existe. Si no existe, crea una nueva instancia de carritoCompras
@@ -192,106 +285,7 @@
                 comprarMas = respuesta.toLowerCase() === 'si';
             }
         }
-        //método es asincrónico y se encarga de cargar los datos desde el archivo.
-        async cargarDatos() {
-            //Se utiliza un bloque try catch para manejar cualquier posible error que pueda ocurrir durante el proceso de lectura del archivo.
-            try {
-                //se utiliza readfile para leer el contenido del archivo datos.json y se espera la finalización para obtener los datos
-                const data = await fs.readFile('./datos.json', 'utf-8');
-                //Se utiliza jhon.parse función que convierte una cadena de texto JSON en un objeto JavaScrip con el fin de trabajar con esos datos de una manera más eficiente
-                this.listaproductos = JSON.parse(data);
-                console.log(`Productos cargados desde datos.json`.bgBlue);
-            } catch (error) {
-                console.error(`Error al cargar el archivo: ${error.message}`.bgRed);
-            }
-        }
-        //método que es asincrónico y se encarga de realizar copias de respaldo.
-        async copiaDeRespaldo() {
-            ////Se utiliza un bloque try catch para manejar cualquier posible error que pueda ocurrir durante el proceso deobtener la fecha 
-            try {
-                //Se utiliuza la funcion obtenerFechaActualFormateada para obtener la fecha actual . Esta fecha se utilizará para construir el nombre del archivo de respaldo
-                const fechaActual = obtenerFechaActualFormateada();
-                //Crea el nombre del archivo de respaldo utilizando la fecha actual formatead
-                const nombreCopiaRespaldo = `respaldo_${fechaActual}.json`;
-                //Se utiliza fs.readFile para leer el contenido del archivo datos.json de forma asíncrona y obtiene los datos en formato de cadena
-                const data = await fs.readFile('./datos.json', 'utf-8');
-                //Se Utiliza fs.copyFile para realizar una copia del archivo original (datos.json) a la carpeta de copias de respaldo, utilizando el nombre construido anteriormente
-                await fs.copyFile('./datos.json', `./copias_respaldo/${nombreCopiaRespaldo}`);
-                //mensaj qeu confirma el exito de la accion 
-                console.log(`Copia de respaldo creada: ${nombreCopiaRespaldo}`.bgGreen);
-            } catch (error) {
-                console.error(`Error al crear la copia de respaldo: ${error.message}`.bgRed);
-            }
-        }
-        //método que es asincrónico y se encarga de realizar una restauracion de copias por si se estropea el archivo principal
-        async restaurarDesdeCopia() {
-            // Función restaurarDesdeCopia
-            try {
-                //Se Utiliza fs.readdir para obtener la lista de archivos de la carpeta copias_respaldo de forma asíncrona que se almacena en listaCopias.
-                const listaCopias = await fs.readdir('./copias_respaldo');
-                //En este if Si no hay copias de respaldo disponibles, muestra un mensaje y sale de la función
-                if (listaCopias.length === 0) {
-                    console.log('No hay copias de respaldo disponibles'.bgYellow);
-                    return;
-            }
-            //Muestra las copias de respaldo disponibles enumeradas en la consola
-                console.log('Copias de respaldo disponibles:'.bgBlue);
-                //Se utiliza una función de flecha que toma dos parámetros. copia
-                listaCopias.forEach((copia, index) => {
-                // Dentro de la función de flecha, se utiliza console.log para imprimir en la consola una cadena que combina el índice más uno index+1 osea el nombre de la copia y suma de 1 al índice se realiza porque los índices de arrays comienzan desde 0, pero para presentar al usuario de manera más natural, se suma 1
-                console.log(`${index + 1}. ${copia}`);
-            });
-            //En esta parte donde se pausa se Pide al usuario que seleccione una copia de respaldo ingresando un número. Convierte la opción a un índice de array restando 1.
-                const opcion = await pausaYObtenerEntrada('Seleccione una copia de respaldo (1, 2, etc.): ');
-                const indiceCopia = parseInt(opcion) - 1;
-                //Se utiliza un if por Si la opción seleccionada es válida, utiliza fs.copyFile para restaurar el archivo original (datos.json) desde la copia seleccionada. 
-                if (!isNaN(indiceCopia) && indiceCopia >= 0 && indiceCopia < listaCopias.length) {
-                    const nombreCopiaSeleccionada = listaCopias[indiceCopia];
-                    await fs.copyFile(`./copias_respaldo/${nombreCopiaSeleccionada}`, './datos.json');
-                    //Muestra mensajes de éxito y cómo aplicar los cambios reiniciando la aplicación. 
-                    console.log(`Restauración exitosa desde la copia: ${nombreCopiaSeleccionada}`.green);
-                    console.log('Reinicie la aplicacion con controlc para aplicar correctamente los cambios'.bgGreen);
-                } else {//En caso contrario muestra un mensaje de opción no válida.
-                    console.log('Opción no válida'.bgRed);
-                }
-            } catch (error) {//Captura cualquier error que pueda ocurrir durante el proceso e imprime un mensaje de error en la consola
-                console.error(`Error al restaurar desde copia de respaldo: ${error.message}`.bgRed);
-            }
-        }
-        //método que es asincrónico y se encarga de realizar la agregacion de un nuevo produnfo 
-        async agregarNuevoProducto() {
-            //se crea un bloque try, donde se manejarán posibles errores Si ocurre algún error dentro de este bloque, el control se trasladará al bloque catch
-            try {
-                //Se Declara una constante nuevoProducto y espera a que la función obtenerDetallesProducto() se complete antes de asignar el resultado a esta constante
-                const nuevoProducto = await obtenerDetallesProducto();
-                //Agrega el nuevo producto a la lista de productos (this.listaproductos).
-                this.listaproductos.push(nuevoProducto);
-                //Llama a la función asincrónica grabararchivoproductos y espera a que se complete 
-                await grabararchivoproductos(this.listaproductos);
-                //imprime un mensaje de exito en la consola 
-                console.log('Producto agregado con éxito'.bgGreen);
-                } catch (error) {//Captura cualquier error que pueda ocurrir durante el proceso e imprime un mensaje de error en la consola
-                console.error(`Error al agregar el nuevo producto: ${error.message}`.bgRed);
-                }
-            }
-        //método que es asincrónico y se encarga de realizar la elminiacion de un producto en el archivo datos.Json
-        async eliminarProductoInteractivo() {
-            //Solicita al usuario ingresar el código del producto mediante la función pausaYObtenerEntrada y espera a que la entrada sea proporcionada antes de continuar
-            const codigo = await pausaYObtenerEntrada('Código del producto: ');
-            //Utiliza el método findIndex para buscar en la lista de productos el índice del producto que tiene el código proporcionado por el usuario
-            const index = this.listaproductos.findIndex(producto => producto.codigoproducto === codigo);
-            // El if  se Comienza como  estructura condicional que verifica si se encontró el producto en la lista
-            if (index !== -1) {
-                // Elimina el producto del array utilizando el método splice. El segundo argumento
-                this.listaproductos.splice(index, 1); // Elimina el producto del array
-                //Guarda la lista actualizada de productos en el archivo utilizando la función asincrónica grabararchivoproductos
-                await grabararchivoproductos(this.listaproductos);
-                //imprime en la consola un mensaje 
-                console.log(`Producto con código ${codigo} eliminado con éxito`.bgGreen);
-            } else {//Inicia el bloque que se ejecutará si el producto no se encuentra en la lista.
-                console.log(`Producto con código ${codigo} no encontrado`.bgRed);
-            }
-        }
+
         //
         imprimirFactura() {
             //Obtiene la lista de productos comprados del carrito de compras (this.#carritoCompras) mediante el método obtenerListaCompras().
